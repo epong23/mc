@@ -1,0 +1,460 @@
+JQuery 1Q
+ 
+<!DOCTYPE html>
+ 
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Advanced jQuery Techniques</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  section {
+      background-color: white;
+      padding: 15px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+ 
+<h1>Advanced jQuery Techniques</h1>
+  <button id="btnHideSections">Hide Sections</button>
+ 
+<section>
+    jQuery makes it easy to create rich, dynamic web pages with just a few lines of code.
+  </section>
+  <section>
+    By using jQuery’s extensive library of plugins, you can add advanced features like animations and AJAX with ease.
+  </section>
+  <section>
+    Explore the world of jQuery and enhance your web development skills with interactive examples and tutorials.
+  </section>
+ 
+<script>
+    $(document).ready(function() {
+      // Hide sections with slideUp on button click
+      $('#btnHideSections').click(function() {
+        $('section').slideUp();
+      });
+ 
+      // Change background color on mouse enter and revert on mouse leave
+      $('section').on('mouseenter', function() {
+        $(this).css('background-color', 'rgb(173, 216, 230)');
+      });
+ 
+      $('section').on('mouseleave', function() {
+        $(this).css('background-color', 'white');
+      });
+    });
+  </script>
+ 
+</body>
+</html>
+ 
+ 
+ 
+ 
+JQuery 2 Question 
+ 
+Html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Traversing Ajax</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    button {
+      background-color: #007bff;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      margin: 10px;
+    }
+    li {
+      background: #dbe9ff;
+      margin: 5px;
+      padding: 5px;
+      width: 100px;
+    }
+  </style>
+</head>
+<body>
+  <button id="btnLoadData">Load Data</button>
+  <div id="dataContainer"></div>
+  <ul id="fruitList">
+    <li>Apple</li>
+    <li>Banana</li>
+    <li>Orange</li>
+    <li>Mango</li>
+    <li>Kiwi</li>
+  </ul>
+  <button id="btnFadeOddFruits">Fade Odd Fruits</button>
+  <script src="script.js"></script>
+</body>
+</html>
+Data.txt
+This is some sample data loaded from the data.txt file.
+Script. Js
+$(document).ready(function () {
+    $('#btnLoadData').click(function () {
+        $('#dataContainer').load('data.txt', function () {
+            alert('Data loaded successfully!');
+        });
+    });
+    $('#btnFadeOddFruits').click(function () {
+        // If test expects Apple, Orange, Kiwi to fade (even indexes)
+        $('#fruitList li:even').fadeOut();
+    });
+});
+Server.js
+const express = require('express');
+const app = express();
+const path = require('path');
+app.use(express.static(__dirname)); // serve files from current dir
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+const PORT = 8081;
+app.listen(PORT, () => {
+  console.log(`Server listening on port ${PORT}`);
+});
+======================================================================================
+js 3
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tip Calculator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Tip Calculator</h1>
+    <form id="tipForm">
+      <label for="billAmount">Bill Amount:</label>
+      <input type="number" id="billAmount" placeholder="Enter bill amount" required />
+
+      <label for="tipPercentage">Tip Percentage:</label>
+      <select id="tipPercentage" required>
+        <option value="5">5%</option>
+        <option value="10">10%</option>
+        <option value="15">15%</option>
+        <option value="20">20%</option>
+      </select>
+
+      <button type="button" onclick="calculateTip()">Calculate Tip</button>
+    </form>
+
+    <div id="result">
+      <p>Tip Amount: <span id="tipAmount">0</span></p>
+      <p>Total Amount: <span id="totalAmount">0</span></p>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+===========================================
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  margin: 20px;
+}
+
+.container {
+  max-width: 600px;
+  margin: 50px auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+h1 {
+  text-align: center;
+}
+
+form {
+  display: grid;
+  gap: 10px;
+}
+
+input, select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  background-color: #4caf50;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#result {
+  margin-top: 20px;
+}
+
+#result p {
+  font-weight: bold;
+}
+======================================
+
+function calculateTip() {
+  const billAmount = document.getElementById('billAmount').value;
+  const tipPercentage = document.getElementById('tipPercentage').value;
+
+  // Validate inputs
+  if (!billAmount || billAmount <= 0) {
+    alert("Please enter a valid bill amount.");
+    return;
+  }
+
+  // Calculate tip and total
+  const tip = (billAmount * tipPercentage) / 100;
+  const total = parseFloat(billAmount) + tip;
+
+  // Display results with two decimal places
+  document.getElementById('tipAmount').textContent = tip.toFixed(2);
+  document.getElementById('totalAmount').textContent = total.toFixed(2);
+}
+
+
+===============================completes============================================================\
+codefirst question 3
+Author.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace dotnetapp.Models
+{
+    public class Author
+    {
+        public int AuthorID{get;set;}
+        public string FirstName{get;set;}
+        public string LastName{get;set;}
+        public ICollection<Book> Books{get;set;}
+    }
+}
+=====================================================
+Book.cs 
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace dotnetapp.Models
+{
+    public class Book
+    {
+        public int BookID{get;set;}
+        public string Title{get;set;}
+        public int PublisherID{get;set;}
+        public Publisher ? Publisher{get;set;}
+        public int AuthorID{get;set;}
+        public Author ? Author{get;set;}
+        public int CategoryID{get;set;}
+        public Category ? Category{get;set;}
+    }
+}
+=======================================================
+Publisher.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace dotnetapp.Models
+{
+    public class Publisher
+    {
+        public int PublisherID{get;set;}
+        public string Name{get;set;}
+        public ICollection<Book> Books{get;set;}
+    }
+}
+==========================================================
+Category.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace dotnetapp.Models
+{
+    public class Category
+    {
+        public int CategoryID{get;set;}
+        public string Name{get;set;}
+        public ICollection<Book> Books{get;set;}
+    }
+}
+==============================================================
+ApplicationDbContext.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+
+namespace dotnetapp.Models
+{
+    public class ApplicationDbContext : DbContext{
+        public DbSet<Author> Authors {get;set;}
+        public DbSet<Book> Books{get;set;}
+        public DbSet<Publisher> Publishers{get;set;}
+        public DbSet<Category> Categories{get;set;}
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options){
+
+        }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder){
+            if(!optionsBuilder.IsConfigured){
+                optionsBuilder.UseSqlServer("User ID=sa;password=examlyMssql@123;server=localhost;Database=appdb;trusted_connection=false;Persist Security Info=False;Encrypt=False");
+            }
+        }
+    }
+}
+===============================================================================================
+program.cs
+
+builder.Services.AddDbContext<ApplicationDbContext>(options=>options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+==========================================================================================
+codefirst question 2
+Student.cs:
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace dotnetapp.Models
+{
+    public class Student
+    {
+        public int StudentID{get;set;}
+        public string FirstName{get;set;}
+        public string LastName{get;set;}
+        public ICollection<Enrollment> Enrollments {get;set;}
+    }
+}
+===============================================
+Course.cs :
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace dotnetapp.Models
+{
+    public class Course
+    {
+        public int CourseID{get;set;}
+        public string Title{get;set;}
+        public int Credits{get;set;}
+        public ICollection<Enrollment> Enrollments {get;set;}
+    }
+}
+======================================================
+Enrollment.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace dotnetapp.Models
+{
+    public class Enrollment
+    {
+        public int EnrollmentID{get;set;}
+        public int CourseID{get;set;}
+        public int StudentID{get;set;}
+        public Course? Course{get;set;}
+        public Student? Student{get;set;}
+    }
+}
+========================================================
+Instructor.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace dotnetapp.Models
+{
+    public class Instructor
+    {
+        public int InstructorID{get;set;}
+        public string FirstName{get;set;}
+        public string LastName{get;set;}
+        public DateTime HireDate{get;set;}
+        public ICollection<CourseAssignment> CourseAssignments{get;set;}
+    }
+}
+============================================================
+Course Assignment.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace dotnetapp.Models
+{
+    public class CourseAssignment
+    {
+        public int CourseAssignmentID{get;set;}
+        public int CourseID{get;set;}
+        public int InstructorID{get;set;}
+        public Course? Course{get;set;}
+        public Instructor? Instructor{get;set;}
+    }
+}
+=============================================================
+ApplicationDbContext.cs
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
+
+namespace dotnetapp.Models
+{
+    public class ApplicationDbContext : DbContext{
+        public DbSet<Student> Students{get;set;}
+        public DbSet<Course> Courses{get;set;}
+        public DbSet<Enrollment> Enrollments{get;set;}
+        public DbSet<Instructor> Instructors{get;set;}
+        public DbSet<CourseAssignment> CourseAssignments{get;set;}
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options){
+
+        }
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder){
+            if(!optionsBuilder.IsConfigured){
+                optionsBuilder.UseSqlServer("User ID=sa;password=examlyMssql@123;server=localhost;Database=appdb;trusted_connection=false;Persist Security Info=False;Encrypt=False");
+            
+            }
+        }
+    }
+}
+==============================================================
+program.cs
+
+builder.Services.AddDbContext<ApplicationDbContext>(options=>options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+======================================================
