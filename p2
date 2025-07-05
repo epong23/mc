@@ -1,0 +1,439 @@
+Project_II_MVC
+===============
+----------Models-------------
+Booking
+---------
+
+namespace MusicianBookingSystem.Models
+{
+    // write your Booking class here
+public class Booking
+{
+    public int BookingID { get; set; }
+    public int SlotID { get; set; }
+    public Slot Slot { get; set; }
+    public int UserID { get; set; }
+}
+
+}
+
+Slot
+------------
+namespace MusicianBookingSystem.Models
+{
+    // write your Slot class here
+
+public class Slot
+{
+    public int SlotID { get; set; }
+    public DateTime Time { get; set; }
+    public int Duration { get; set; }
+    public int Capacity { get; set; } = 5;
+    public List<Booking> Bookings { get; set; } = new List<Booking>();
+}
+
+}
+
+AppDbContext
+------------
+using System.Reflection.Emit;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+namespace MusicianBookingSystem.Models
+{
+    public class ApplicationDbContext:DbContext
+    {
+        // write your ApplicationDbContext class here
+      public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) 
+      {
+
+      }
+
+    public DbSet<Slot> Slots { get; set; }
+    public DbSet<Booking> Bookings { get; set; }   
+    }
+}
+
+-------------Exceptions--------------
+SlotBookingException
+--------------------
+using System;
+
+namespace MusicianBookingSystem.Exceptions
+{
+public class SlotBookingException : Exception
+{
+    public SlotBookingException(string message) : base(message) {}
+}
+}
+
+------------Controllers-----------
+BookingController
+------------------
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using MusicianBookingSystem.Models;
+using MusicianBookingSystem.Exceptions;
+
+namespace MusicianBookingSystem.Controllers
+{
+    // write your BookingController class here
+
+public class BookingController : Controller
+{
+    private readonly ApplicationDbContext _context;
+
+    public BookingController(ApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public IActionResult Index()
+    {
+        var slots = _context.Slots.Include(s => s.Bookings).ToList();
+        return View(slots);
+    }
+
+    public IActionResult Book(int id, int userId)
+    {
+         try
+    {
+        var slot = _context.Slots
+            .Include(s => s.Bookings)
+            .FirstOrDefault(s => s.SlotID == id);
+
+        if (slot == null)
+            return NotFound();
+
+        if (slot.Bookings.Any(b => b.UserID == userId))
+            throw new SlotBookingException("You have already booked this slot.");
+
+        if (slot.Bookings.Count >= slot.Capacity)
+            throw new SlotBookingException("Slot is full.");
+
+        var booking = new Booking
+        {
+            SlotID = id,
+            UserID = userId
+        };
+
+        _context.Bookings.Add(booking);
+        _context.SaveChanges();
+
+        return RedirectToAction("Summary", new { userId = userId });
+    }
+    catch (SlotBookingException ex)
+    {
+        // Optionally use TempData or ViewBag to pass error message to a view
+        TempData["ErrorMessage"] = ex.Message;
+        return RedirectToAction("Index");
+    }
+    catch (Exception ex)
+    {
+        // Generic error logging or message
+        TempData["ErrorMessage"] = "An unexpected error occurred: " + ex.Message;
+        return RedirectToAction("Index");
+    }
+        /*
+        var slot = _context.Slots.Include(s => s.Bookings).FirstOrDefault(s => s.SlotID == id);
+        if (slot == null) return NotFound();
+
+        if (slot.Bookings.Any(b => b.UserID == userId))
+            throw new SlotBookingException("You have already booked this slot.");
+
+        if (slot.Bookings.Count >= slot.Capacity)
+            throw new SlotBookingException("Slot is full.");
+
+        var booking = new Booking { SlotID = id, UserID = userId };
+        _context.Bookings.Add(booking);
+        _context.SaveChanges();
+
+        return RedirectToAction("Summary", new { userId = userId });
+        */
+    }
+
+    public IActionResult Summary(int userId)
+    {
+        var bookings = _context.Bookings
+            .Where(b => b.UserID == userId)
+            .Include(b => b.Slot)
+            .ToList();
+
+        return View(bookings);
+    }
+}
+}
+
+SlotController
+--------------
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using MusicianBookingSystem.Models;
+using MusicianBookingSystem.Exceptions;
+
+namespace MusicianBookingSystem.Controllers
+{
+    // write your BookingController class here
+
+public class BookingController : Controller
+{
+    private readonly ApplicationDbContext _context;
+
+    public BookingController(ApplicationDbContext context)
+    {
+        _context = context;
+    }
+
+    public IActionResult Index()
+    {
+        var slots = _context.Slots.Include(s => s.Bookings).ToList();
+        return View(slots);
+    }
+
+    public IActionResult Book(int id, int userId)
+    {
+         try
+    {
+        var slot = _context.Slots
+            .Include(s => s.Bookings)
+            .FirstOrDefault(s => s.SlotID == id);
+
+        if (slot == null)
+            return NotFound();
+
+        if (slot.Bookings.Any(b => b.UserID == userId))
+            throw new SlotBookingException("You have already booked this slot.");
+
+        if (slot.Bookings.Count >= slot.Capacity)
+            throw new SlotBookingException("Slot is full.");
+
+        var booking = new Booking
+        {
+            SlotID = id,
+            UserID = userId
+        };
+
+        _context.Bookings.Add(booking);
+        _context.SaveChanges();
+
+        return RedirectToAction("Summary", new { userId = userId });
+    }
+    catch (SlotBookingException ex)
+    {
+        // Optionally use TempData or ViewBag to pass error message to a view
+        TempData["ErrorMessage"] = ex.Message;
+        return RedirectToAction("Index");
+    }
+    catch (Exception ex)
+    {
+        // Generic error logging or message
+        TempData["ErrorMessage"] = "An unexpected error occurred: " + ex.Message;
+        return RedirectToAction("Index");
+    }
+        /*
+        var slot = _context.Slots.Include(s => s.Bookings).FirstOrDefault(s => s.SlotID == id);
+        if (slot == null) return NotFound();
+
+        if (slot.Bookings.Any(b => b.UserID == userId))
+            throw new SlotBookingException("You have already booked this slot.");
+
+        if (slot.Bookings.Count >= slot.Capacity)
+            throw new SlotBookingException("Slot is full.");
+
+        var booking = new Booking { SlotID = id, UserID = userId };
+        _context.Bookings.Add(booking);
+        _context.SaveChanges();
+
+        return RedirectToAction("Summary", new { userId = userId });
+        */
+    }
+
+    public IActionResult Summary(int userId)
+    {
+        var bookings = _context.Bookings
+            .Where(b => b.UserID == userId)
+            .Include(b => b.Slot)
+            .ToList();
+
+        return View(bookings);
+    }
+}
+}
+========================
+Views
+========================
+Booking.cshtml
+---------------
+@model Slot
+
+@{
+    ViewData["Title"] = "Confirm Booking";
+}
+
+<h2>Confirm Booking</h2>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Slot Details</h5>
+        <p><strong>Time:</strong> @Model.Time.ToString("f")</p>
+        <p><strong>Duration:</strong> @Model.Duration minutes</p>
+        <p><strong>Capacity:</strong> @Model.Capacity</p>
+        <p><strong>Currently Booked:</strong> @Model.Bookings.Count</p>
+        <p><strong>Remaining Slots:</strong> @(Model.Capacity - Model.Bookings.Count)</p>
+
+        @if ((Model.Capacity - Model.Bookings.Count) > 0)
+        {
+            <form asp-action="Book" asp-controller="Booking" method="post">
+                <input type="hidden" name="id" value="@Model.SlotID" />
+                <input type="hidden" name="userId" value="1" /> <!-- Replace with actual user ID -->
+                <button type="submit" class="btn btn-success">Confirm Booking</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </form>
+        }
+        else
+        {
+            <div class="alert alert-danger">This slot is full. Please choose another one.</div>
+        }
+    </div>
+</div>
+
+Index.chstml
+--------------
+@model List<Slot>
+
+@{
+    ViewData["Title"] = "Book a Slot";
+}
+
+<h2>Available Slots for Booking</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Time</th>
+            <th>Duration (min)</th>
+            <th>Remaining Capacity</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var slot in Model)
+    {
+        int remaining = slot.Capacity - slot.Bookings.Count;
+
+        <tr>
+            <td>@slot.Time.ToString("f")</td>
+            <td>@slot.Duration</td>
+            <td>@remaining</td>
+            <td>
+                @if (remaining > 0)
+                {
+                    <a asp-controller="Booking"
+                       asp-action="Book"
+                       asp-route-id="@slot.SlotID"
+                       asp-route-userId="1"
+                       class="btn btn-primary">
+                        Book
+                    </a>
+                }
+                else
+                {
+                    <span class="text-danger">Slot Full</span>
+                }
+            </td>
+        </tr>
+    }
+    @if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+    </tbody>
+</table>
+Summmary.cshtml
+----------------
+@model List<Booking>
+
+<h2>Your Bookings</h2>
+
+<table>
+    <tr>
+        <th>Time</th>
+        <th>Duration</th>
+    </tr>
+    @foreach (var booking in Model)
+    {
+        <tr>
+            <td>@booking.Slot.Time</td>
+            <td>@booking.Slot.Duration min</td>
+        </tr>
+    }
+</table>
+
+-----------Slot--------------
+Index
+---------
+@model List<Slot>
+
+<h2>Available Slots</h2>
+
+<table>
+    <tr>
+        <th>Time</th>
+        <th>Duration</th>
+        <th>Remaining Capacity</th>
+        <th>Action</th>
+    </tr>
+    @foreach (var slot in Model)
+    {
+        <tr>
+            <td>@slot.Time</td>
+            <td>@slot.Duration min</td>
+            <td>@(slot.Capacity - slot.Bookings.Count)</td>
+            <td>
+                <a asp-controller="Booking" asp-action="Book" asp-route-id="@slot.SlotID" asp-route-userId="1">Book</a>
+            </td>
+        </tr>
+    }
+</table>
+
+=============Program.cs==============
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using MusicianBookingSystem.Models;
+
+var builder = WebApplication.CreateBuilder(args);
+
+
+// Add services to the container.
+builder.Services.AddControllersWithViews();
+//
+// Register ApplicationDbContext with SQL Server
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+//
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Slot}/{action=Index}/{id?}");
+
+app.Run();
