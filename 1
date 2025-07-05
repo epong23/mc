@@ -1,0 +1,512 @@
+MVC 1
+EmployeeController
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security;
+using System.Threading.Tasks;
+using dotnetapp.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using System.ComponentModel.DataAnnotations;
+namespace dotnetapp.Controllers
+{
+public class EmployeeController : Controller
+{
+private readonly ApplicationDbContext _context;
+public EmployeeController(ApplicationDbContext context)
+{
+_context=context;
+}
+public IActionResult Index()
+{
+var emp=_context.Employees.ToList();
+return View(emp);
+}
+public IActionResult Details(int id)
+{
+var dept=_context.Employees.Find(id);
+if(dept==null)
+{
+return NotFound();
+}
+return View(dept);
+}
+public IActionResult Create()
+{
+ViewBag.Employees=_context.Employees.ToList();
+return View();
+}
+[HttpPost]
+[ValidateAntiForgeryToken]
+public IActionResult Create(Employee employee)
+{
+if(ModelState.IsValid)
+{
+_context.Employees.Add(employee);
+_context.SaveChanges();
+return RedirectToAction(nameof(Index));
+}
+return View(employee);
+}
+public IActionResult Edit(int id)
+{
+var dept=_context.Employees.Find(id);
+if(dept==null)
+{
+return NotFound();
+}
+ViewBag.Departments=_context.Departments.ToList();
+return View(dept);
+}
+[HttpPost]
+[ValidateAntiForgeryToken]
+public IActionResult Edit(int id,Employee employee)
+{
+if(id!=employee.EmployeeId)
+{
+return BadRequest();
+}
+if(ModelState.IsValid)
+{
+_context.Employees.Update(employee);
+_context.SaveChanges();
+return RedirectToAction(nameof(Index));
+}
+ViewBag.Employees=_context.Employees.ToList();
+return View(employee);
+}
+public IActionResult Delete(int id)
+{
+var dept=_context.Employees.Find(id);
+if(dept==null)
+{
+return NotFound();
+}
+return View(dept);
+}
+[HttpPost,ActionName("Delete")]
+[ValidateAntiForgeryToken]
+public IActionResult DeleteConfirmed(int id)
+{
+var dept=_context.Employees.Find(id);
+if(dept==null)
+{
+return NotFound();
+}
+_context.Employees.Remove(dept);
+_context.SaveChanges();
+return RedirectToAction(nameof(Index));
+}
+}
+}
+----------------------------------------------------------------------------------
+------------
+Department Controller
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Security;
+using System.Threading.Tasks;
+using dotnetapp.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+namespace dotnetapp.Controllers
+{
+public class DepartmentController : Controller
+{
+private readonly ApplicationDbContext _context;
+public DepartmentController(ApplicationDbContext context)
+{
+_context=context;
+}
+public IActionResult Index()
+{
+var dept=_context.Departments.ToList();
+return View(dept);
+}
+public IActionResult Details(int id)
+{
+var dept=_context.Departments.Find(id);
+if(dept==null)
+{
+return NotFound();
+}
+return View(dept);
+}
+public IActionResult Create()
+{
+ViewBag.Departments=_context.Departments.ToList();
+return View();
+}
+[HttpPost]
+[ValidateAntiForgeryToken]
+public IActionResult Create(Department department)
+{
+if(ModelState.IsValid)
+{
+_context.Departments.Add(department);
+_context.SaveChanges();
+return RedirectToAction(nameof(Index));
+}
+return View(department);
+}
+public IActionResult Edit(int id)
+{
+var dept=_context.Departments.Find(id);
+if(dept==null)
+{
+return NotFound();
+}
+return View(dept);
+}
+[HttpPost]
+[ValidateAntiForgeryToken]
+public IActionResult Edit(int id,Department department)
+{
+if(id!=department.DepartmentId)
+{
+return BadRequest();
+}
+if(ModelState.IsValid)
+{
+_context.Departments.Update(department);
+_context.SaveChanges();
+return RedirectToAction(nameof(Index));
+}
+ViewBag.Departments=_context.Departments.ToList();
+return View(department);
+}
+public IActionResult Delete(int id)
+{
+var dept=_context.Departments.Find(id);
+if(dept==null)
+{
+return NotFound();
+}
+return View(dept);
+}
+[HttpPost,ActionName("Delete")]
+[ValidateAntiForgeryToken]
+public IActionResult DeleteConfirmed(int id)
+{
+var dept=_context.Departments.Find(id);
+if(dept==null)
+{
+return NotFound();
+}
+_context.Departments.Remove(dept);
+_context.SaveChanges();
+return RedirectToAction(nameof(Index));
+}
+}
+}
+----------------------------------------------------------------------------------
+-----------
+ApplicationDbContext
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
+namespace dotnetapp.Models
+{
+public class ApplicationDbContext: DbContext
+{
+public ApplicationDbContext(DbContextOptions<ApplicationDbContext>
+options): base(options){}
+protected override void OnConfiguring(DbContextOptionsBuilder
+optionsBuilder)
+{
+if(!optionsBuilder.IsConfigured)
+{
+optionsBuilder.UseSqlServer("User
+ID=sa;password=examlyMssql@123;server=localhost;Database=appdb;trusted_connection=
+false;Persist Security Info=False;Encrypt=False;");
+}
+}
+public DbSet<Department> Departments {get;set;}
+public DbSet<Employee> Employees{get;set;}
+protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+modelBuilder.Entity<Employee>().HasOne(e=>e.Department).WithMany(d=>d.Employees).H
+asForeignKey(e=>e.DepartmentId).OnDelete(DeleteBehavior.Cascade);
+}
+}
+}
+----------------------------------------------------------------------------------
+--------------------
+Department
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+namespace dotnetapp.Models
+{
+public class Department
+{
+[Key]
+public int DepartmentId {get;set;}
+public string Name {get;set;}
+public ICollection<Employee> Employees {get;set;}
+}
+}
+----------------------------------------------------------------------------------
+---------------------
+Employee
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+namespace dotnetapp.Models
+{
+public class Employee
+{
+[Key]
+public int EmployeeId {get;set;}
+public string FirstName {get;set;}
+public string LastName {get;set;}
+public int DepartmentId {get;set;}
+public Department Department {get;set;}
+}
+}
+----------------------------------------------------------------------------------
+-------------------
+ErrorViewModel
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+namespace dotnetapp.Models
+{
+public class ErrorViewModel
+{
+public string? RequestId {get;set;}
+public bool ShowRequestId =>! string.IsNullOrEmpty(RequestId);
+}
+}
+----------------------------------------------------------------------------------
+--------------------
+Department Views - Create
+@model dotnetapp.Models.Department
+@{
+ViewBag.Title="Create Department";
+}
+<h1>Create Department</h1>
+<label>Name</label>
+<input asp-for="Name" class="form-control"/>
+<a asp-action="Create" method="post"></a>
+<button type="submit" class="btn btn-primary">Add Department</button>
+------------------------------------------------------------------
+Department Views - Delete
+@model dotnetapp.Models.Department
+@{
+ViewBag.Title="Delete Department";
+}
+<h1>Delete Department</h1>
+<p>Are you sure you want to delete this department?</p>
+<p>Department Details</p>
+<div>
+<strong>@Model.Name</strong>
+</div>
+<form asp-action="DeleteConfirmed" method="post">
+<input type="hidden" asp-for="DepartmentId"/>
+<button type="submit" class="btn btn-primary">Back to List</button>
+</form>
+-------------------------------------------------------------------
+Department Views - Details
+@model dotnetapp.Models.Department
+@{
+ViewBag.Title="Department Details";
+}
+<h1>Department Details</h1>
+<div>
+<h4>Name: @Model.Name</h4>
+</div>
+<a asp-action="Index">Back to List</a>
+-------------------------------------------------------------------
+Department Views - Edit
+@model dotnetapp.Models.Department
+@{
+ViewBag.Title="Edit Department";
+}
+<h1>Edit Department</h1>
+<label>Name</label>
+<input asp-for="Name" class="form-control"/>
+<button type="submit" class="btn btn-primary">Save Department</button>
+---------------------------------------------------------------------
+Department Views - Index
+@model List<dotnetapp.Models.Department>
+@{
+ViewBag.Title="Department List";
+}
+<h1>Departments</h1>
+<table class="table">
+<thead>
+<tr>
+<th>Name</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+@foreach(var dept in Model)
+{
+<tr>
+<td>@dept.Name</td>
+<td>
+<a asp-action="Edit"
+asp-route-id="@dept.DepartmentId">Edit</a>
+<a asp-action="Delete"
+asp-route-id="@dept.DepartmentId">Delete</a>
+</td>
+</tr>
+}
+</tbody>
+</table>
+<a asp-action="Create" class="btn btn-primary">Create</a>
+--------------------------------------------------------------------------
+Employees Views - Create
+@model dotnetapp.Models.Employee
+@{
+ViewBag.Title="Create Employee";
+}
+<h1>Create Employee</h1>
+<form asp-action="Create" method="post">
+<input type="hidden" asp-for="EmployeeId"/>
+<div>
+<label>FirstName</label>
+<input asp-for="FirstName" class="form-control"/>
+</div>
+<div>
+<label>LastName</label>
+<input asp-for="LastName" class="form-control"/>
+</div>
+<div class="form-group">
+<label for="DepartmentId">Department</label>
+<select asp-for="DepartmentId" class="form-control" asp-items="@(new
+SelectList(ViewBag.Departments,"id","Name"))">
+<option value="">Select Department</option>
+</select>
+</div>
+<br>
+<button type="submit" class="btn btn-primary">Create</button>
+</form>
+<a asp-action="Index">Back to List</a>
+---------------------------------------------------------------------------
+Employees Views - Delete
+@model dotnetapp.Models.Employee
+@{
+ViewBag.Title="Delete Employee";
+}
+<h1>Delete Employee</h1>
+<p>Are you sure you want to delete this department?</p>
+<p>Employee Details</p>
+<div>
+<strong>@Model.FirstName</strong>
+</div>
+<div>
+<strong>@Model.LastName</strong>
+</div>
+<div>
+<strong>@Model.Department</strong>
+</div>
+<form asp-action="DeleteConfirmed" method="post">
+<input type="hidden" asp-for="EmployeeId"/>
+<button type="submit" class="btn btn-primary">Back to List</button>
+</form>
+-------------------------------------------------------------------------------
+Employees Views - Details
+@model dotnetapp.Models.Employee
+@{
+ViewBag.Title="Employee Details";
+}
+<h1>Employee Details</h1>
+<div>
+<h4>Name: @Model.FirstName</h4>
+<h4>Name: @Model.LastName</h4>
+<h4>Name: @Model.Department</h4>
+</div>
+<a asp-action="Index">Back to List</a>
+----------------------------------------------------------------------------
+Employee Views - Edit
+@model dotnetapp.Models.Employee
+@{
+ViewBag.Title="Edit Employee";
+}
+<h1>Edit Employee</h1>
+<label>FirstName</label>
+<input asp-for="FirstName" class="form-control"/>
+<label>LastName</label>
+<input asp-for="LastName" class="form-control"/>
+<label>Department</label>
+<input asp-for="Department" class="form-control"/>
+<button type="submit" class="btn btn-primary">Save Employee</button>
+-----------------------------------------------------------------------------
+Employee Views - Index
+@model List<dotnetapp.Models.Employee>
+{
+ViewBag.Title="Employee List";
+}
+<h1>Employees</h1>
+<table class="table">
+<thead>
+<tr>
+<th>FirstName</th>
+<th>LastName</th>
+<th>Department</th>
+</tr>
+</thead>
+<tbody>
+@foreach (var emp in Model)
+{
+<tr>
+<td>@emp.FirstName</td>
+<td>@emp.LastName</td>
+<td>@emp.Department</td>
+<td>
+<a asp-action="Edit" asp-route-id="@emp.EmployeeId">Edit</a>
+<a asp-action="Delete"
+asp-route-id="@emp.EmployeeId">Delete</a>
+</td>
+</tr>
+}
+</tbody>
+</table>
+<a asp-action="Create" class="btn btn-primary">Create</a>
+----------------------------------------------------------------------------------
+--
+Program.cs
+using dotnetapp.Models;
+using Microsoft.EntityFrameworkCore;
+var builder = WebApplication.CreateBuilder(args);
+// Add services to the container.
+builder.Services.AddControllersWithViews();
+builder.Services.AddDbContext<ApplicationDbContext>(options=>options.UseSqlServer(
+builder.Configuration.GetConnectionString("DefaultConnection")));
+var app = builder.Build();
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+app.UseExceptionHandler("/Home/Error");
+// The default HSTS value is 30 days. You may want to change this for
+production scenarios, see https://aka.ms/aspnetcore-hsts.
+app.UseHsts();
+}
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+app.UseRouting();
+app.UseAuthorization();
+app.MapControllerRoute(
+name: "default",
+pattern: "{controller=Department}/{action=Index}/{id?}");
+app.MapControllerRoute(
+name: "default",
+pattern: "{controller=Employee}/{action=Index}/{id?}");
+app.Run();
