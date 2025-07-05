@@ -1,0 +1,139 @@
+VAL 2
+VAL 2
+Customer Controller.cs: 
+
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using dotnetapp.Models;
+using dotnetapp.Data;
+
+namespace dotnetapp.Controllers
+{
+    //[Route("[controller]")]
+    public class CustomerController : Controller
+    {
+         private readonly ApplicationDbContext _context;
+         public CustomerController(ApplicationDbContext context){
+            _context=context;
+         }
+         [HttpGet]
+         public IActionResult Create(){
+            return View();
+         }
+         [HttpPost]
+         [ValidateAntiForgeryToken]
+         public IActionResult Create(Customer customer){
+            if(ModelState.IsValid){
+                _context.Customers.Add(customer);
+                _context.SaveChanges();
+                return RedirectToAction("Success");
+            }
+            return View(customer);
+         }
+         public IActionResult Success(){
+            ViewBag.Message = "Successfully Created";
+            return View();
+         }
+    }
+}
+====================================
+ApplicationDb
+
+
+using dotnetapp.Models;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+
+namespace dotnetapp.Data
+{
+
+    public class ApplicationDbContext : DbContext
+    {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options){}
+        public DbSet<Customer> Customers{get;set;}
+    }
+}
+
+=======================================
+Customer.cs
+
+using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+namespace dotnetapp.Models
+{
+
+    public class Customer
+    {
+        [Key]
+        public int CustomerId{get;set;}
+
+        [Required(ErrorMessage="First name is required.")]
+        public string FirstName{get;set;}
+
+        [Required(ErrorMessage="Last name is required.")]
+        public string LastName{get;set;}
+
+        [Required(ErrorMessage="The Email field is required.")]
+        [EmailAddress(ErrorMessage="Invalid email format")]
+        [UniqueEmail(ErrorMessage="Email must be unique")]
+        public string Email{get;set;}
+
+        [Required(ErrorMessage="Phone number is required.")]
+        [RegularExpression(@"^\+?[1-9]\d{1,14}$",ErrorMessage="Invalid phone number format.")]
+        public string PhoneNumber{get;set;}
+
+        [Required(ErrorMessage="The value is invalid.")]
+        [DataType(DataType.Date)]
+        [MinAge(18, ErrorMessage="Customer must be 18 years or older.")]
+        public DateTime BirthDate{get;set;}
+
+        [Required(ErrorMessage="Address is required.")]
+        public string Address{get;set;}
+    }
+
+}
+================================================
+UniqueEmailAttribute
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using dotnetapp.Data;
+
+namespace dotnetapp.Models
+{
+    public class UniqueEmailAttribute : ValidationAttribute{
+        protected override ValidationResult IsValid(object value, ValidationContext validationContext){
+            if(value==null){
+                return ValidationResult.Success;
+            }
+            var context = (ApplicationDbContext)validationContext.GetService(typeof(ApplicationDbContext));
+            var email = value.ToString();
+            bool emailExists = context.Customers.Any(e=>e.Email == email);
+            return emailExists ? new ValidationResult(ErrorMessage) : ValidationResult.Success;
+        }
+    }
+    public class MinAgeAttribute : ValidationAttribute{
+        private readonly int _minAge;
+        public MinAgeAttribute(int minAge){
+            _minAge=minAge;
+        }
+        protected override ValidationResult IsValid(object value, ValidationContext validationContext){
+            if(value is DateTime BirthDate){
+                var age = DateTime.Today.Year - BirthDate.Year;
+                if(BirthDate > DateTime.Today.AddYears(-age)) age--;
+                return age >= _minAge ? ValidationResult.Success : new ValidationResult(ErrorMessage);
+            }
+            return new ValidationResult("Invalid date Format");
+        }
+    }
+}
+=========================================
