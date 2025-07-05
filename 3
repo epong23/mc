@@ -1,0 +1,284 @@
+view 1
+
+
+Index.cshtml
+==============
+@model List<Employees.Models.Employee>
+@{
+    ViewBag.Title = "Employee List";
+}
+
+<h1>Employee List</h1>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Date of Birth</th>
+            <th>Department</th>
+            <th>Salary</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var emp in Model)
+        {
+            <tr>
+                <td>@emp.Id</td>
+                <td>@emp.Name</td>
+                <td>@emp.Email</td>
+                <td>@emp.Dob.ToShortDateString()</td>
+                <td>@emp.Dept</td>
+                <td>@emp.Salary</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@emp.Id">Details</a> |
+                    <a asp-action="Edit" asp-route-id="@emp.Id">Edit</a> |
+                    <a asp-action="Delete" asp-route-id="@emp.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<a asp-action="Create" class="btn btn-primary">Add New Employee</a>
+
+Edit.cshtml
+===============
+@model Employees.Models.Employee
+@{
+    ViewBag.Title = "Edit Employee";
+}
+
+<h1>Edit Employee</h1>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="Id" />
+    <div>
+        <label>Name</label>
+        <input asp-for="Name" class="form-control" />
+    </div>
+    <div>
+        <label>Email</label>
+        <input asp-for="Email" class="form-control" />
+    </div>
+    <div>
+        <label>Date of Birth</label>
+        <input asp-for="Dob" type="date" class="form-control" />
+    </div>
+    <div>
+        <label>Department</label>
+        <input asp-for="Dept" class="form-control" />
+    </div>
+    <div>
+        <label>Salary</label>
+        <input asp-for="Salary" class="form-control" />
+    </div>
+    <br />
+    <button type="submit" class="btn btn-success">Save</button>
+</form>
+
+<a asp-action="Index">Back to List</a>
+
+Details.cshtml
+===============
+@model Employees.Models.Employee
+@{
+    ViewBag.Title = "Employee Details";
+}
+
+<h1>Employee Details</h1>
+
+<div>
+    <h4>Id: @Model.Id</h4>
+    <h4>Name: @Model.Name</h4>
+    <h4>Email: @Model.Email</h4>
+    <h4>Date of Birth: @Model.Dob.ToShortDateString()</h4>
+    <h4>Department: @Model.Dept</h4>
+    <h4>Salary: @Model.Salary</h4>
+</div>
+
+<a asp-action="Index">Back to List</a>
+
+Delete.cshtml
+==============
+@model Employees.Models.Employee
+@{
+    ViewBag.Title = "Delete Employee";
+}
+
+<h1>Delete Employee</h1>
+
+<h4>Are you sure you want to delete this employee?</h4>
+<div>
+    <strong>@Model.Name</strong> (ID: @Model.Id)
+</div>
+
+<form asp-action="DeleteConfirmed" method="post">
+    <input type="hidden" asp-for="Id" />
+    <br />
+    <button type="submit" class="btn btn-danger">Delete</button>
+    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+</form>
+
+
+Create.cshtml
+===============
+@model Employees.Models.Employee
+@{
+    ViewBag.Title = "Create New Employee";
+}
+
+<h1>Create New Employee</h1>
+
+<form asp-action="Create" method="post">
+    <div>
+        <label>ID</label>
+        <input asp-for="Id" class="form-control" />
+    </div>
+    <div>
+        <label>Name</label>
+        <input asp-for="Name" class="form-control" />
+    </div>
+    <div>
+        <label>Email</label>
+        <input asp-for="Email" class="form-control" />
+    </div>
+    <div>
+        <label>Date of Birth</label>
+        <input asp-for="Dob" type="date" class="form-control" />
+    </div>
+    <div>
+        <label>Department</label>
+        <input asp-for="Dept" class="form-control" />
+    </div>
+    <div>
+        <label>Salary</label>
+        <input asp-for="Salary" class="form-control" />
+    </div>
+    <br />
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
+
+<a asp-action="Index">Back to List</a>
+
+
+Employee.cs
+===============
+namespace Employees.Models
+{
+    public class Employee
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public DateTime Dob { get; set; }
+        public string Dept { get; set; }
+        public decimal Salary { get; set; }
+    }
+}
+
+
+EmployeeController.cs
+=====================
+using System;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
+using Employees.Models;
+
+namespace Employees.Controllers
+{
+    public class EmployeeController : Controller
+    {
+        private static List<Employee> _employees = new List<Employee>
+        {
+            new Employee { Id = 1, Name = "John Doe", Email = "john@example.com", Dob = new DateTime(1990, 5, 15), Dept = "IT", Salary = 50000.00m },
+            new Employee { Id = 2, Name = "Jane Smith", Email = "jane@example.com", Dob = new DateTime(1985, 10, 20), Dept = "HR", Salary = 60000.00m }
+        };
+
+        public IActionResult Index()
+        {
+            return View(_employees);
+        }
+
+        public IActionResult Details(int id)
+        {
+            var employee = _employees.Find(e => e.Id == id);
+            if (employee == null)
+            {
+                return NotFound();
+            }
+            return View(employee);
+        }
+
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Create(Employee employee)
+        {
+            if (ModelState.IsValid)
+            {
+                employee.Id = _employees.Count + 1; // Assign new ID
+                _employees.Add(employee);
+                return RedirectToAction(nameof(Index));
+            }
+            return View(employee);
+        }
+
+        public IActionResult Edit(int id)
+        {
+            var employee = _employees.Find(e => e.Id == id);
+            if (employee == null)
+            {
+                return NotFound();
+            }
+            return View(employee);
+        }
+
+        [HttpPost]
+        public IActionResult Edit(Employee employee)
+        {
+            if (ModelState.IsValid)
+            {
+                var existingEmployee = _employees.Find(e => e.Id == employee.Id);
+                if (existingEmployee == null)
+                {
+                    return NotFound();
+                }
+                existingEmployee.Name = employee.Name;
+                existingEmployee.Email = employee.Email;
+                existingEmployee.Dob = employee.Dob;
+                existingEmployee.Dept = employee.Dept;
+                existingEmployee.Salary = employee.Salary;
+                return RedirectToAction(nameof(Index));
+            }
+            return View(employee);
+        }
+
+        public IActionResult Delete(int id)
+        {
+            var employee = _employees.Find(e => e.Id == id);
+            if (employee == null)
+            {
+                return NotFound();
+            }
+            return View(employee);
+        }
+
+        [HttpPost, ActionName("DeleteConfirmed")]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            var employee = _employees.Find(e => e.Id == id);
+            if (employee == null)
+            {
+                return NotFound();
+            }
+            _employees.Remove(employee);
+            return RedirectToAction(nameof(Index));
+        }
+    }
+}
+
