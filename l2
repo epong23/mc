@@ -1,0 +1,312 @@
+linq
+linq3
+LibraryController.cs
+
+using Microsoft.AspNetCore.Mvc;
+using System;
+using Microsoft.EntityFrameworkCore;
+using dotnetapp.Models;
+
+
+namespace dotnetapp.Controllers
+{
+public class LibraryController : Controller
+
+{
+
+    private readonly AppDbContext _context;
+
+    public LibraryController(AppDbContext context)
+
+    {
+
+    _context = context;
+
+    }
+
+    // Display all books
+
+    public IActionResult DisplayAllBooks()
+
+    {
+
+    var books = _context.Books.ToList();
+
+    return View(books);
+
+    }
+
+    // Display books for specific library card
+
+    public IActionResult DisplayBooksForLibraryCard(int libraryCardId)
+
+    {
+
+    var books = _context.Books
+
+    .Where(b => b.LibraryCardId == libraryCardId)
+
+    .ToList();
+
+    return View(books);
+
+    }
+
+    // Search books by title
+
+    public IActionResult SearchBooksByTitle(string query)
+
+    {
+
+    var books = _context.Books
+
+    .Where(b => b.Title.Contains(query))
+
+    .ToList();
+
+    return View("DisplayAllBooks", books);
+
+    }
+
+    // Add a new book
+    [HttpGet]
+
+    public IActionResult AddBook()
+
+    {
+
+        return View();
+
+    }
+
+
+    [HttpPost]
+
+    public IActionResult AddBook(Book book)
+
+    {
+
+    if (ModelState.IsValid)
+
+    {
+
+    _context.Books.Add(book);
+
+    _context.SaveChanges();
+
+    return RedirectToAction("DisplayAllBooks");
+
+    }
+
+    return View(book);
+
+    }
+
+    // Delete a book
+
+    public IActionResult DeleteBook(int id)
+
+    {
+
+    var book = _context.Books.Find(id);
+
+    if (book == null) return NotFound();
+
+    _context.Books.Remove(book);
+
+    _context.SaveChanges();
+
+    return RedirectToAction("DisplayAllBooks");
+    return View();
+
+    }
+
+}
+}
+================================================
+AppDbcontext:
+
+using Microsoft.EntityFrameworkCore;
+using System;
+using Microsoft.EntityFrameworkCore.Design;
+
+namespace dotnetapp.Models
+{
+public class AppDbContext : DbContext
+{
+
+    public DbSet<Book> Books { get; set; }
+
+    public DbSet<LibraryCard> LibraryCards { get; set; }
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options){
+
+    }
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+
+    {
+        if(!optionsBuilder.IsConfigured)
+
+        optionsBuilder.UseSqlServer("User ID=sa;password=examlyMssql@123;server=localhost;database=appdb;trusted_connection=false;Persist Security Info=False;Encrypt=False");
+
+    }
+
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+
+    {
+
+    modelBuilder.Entity<LibraryCard>()
+
+    .HasMany(c => c.Books)
+
+    .WithOne(b => b.LibraryCard)
+
+    .HasForeignKey(b => b.LibraryCardId);
+
+    // Seeding initial data
+
+    modelBuilder.Entity<LibraryCard>().HasData(
+
+    new LibraryCard
+
+    {
+
+    Id = 1,
+
+    CardNumber = "LC-12345",
+
+    MemberName = "John Doe",
+
+    ExpiryDate = new DateTime(2025, 12, 31)
+
+    },
+
+    new LibraryCard
+
+    {
+
+    Id = 2,
+
+    CardNumber = "LC-54321",
+
+    MemberName = "Jane Smith",
+
+    ExpiryDate = new DateTime(2024, 10, 15)
+
+    }
+
+    );
+
+    }
+
+}
+    
+}
+
+=================================================
+Book.cs
+
+using System;
+using System.ComponentModel.DataAnnotations;
+
+namespace dotnetapp.Models
+{
+public class Book
+
+{
+    public int Id { get; set; }
+
+    [Required]
+
+    [MaxLength(100)]
+
+    public string Title { get; set; }
+
+    [Required]
+
+    [MaxLength(50)]
+
+    public string Author { get; set; }
+
+    [Range(1000, 2024)]
+
+    public int PublishedYear { get; set; }
+
+    public int? LibraryCardId { get; set; }
+
+    public LibraryCard LibraryCard { get; set; }
+
+}
+}
+========================================
+LibraryCard.cs
+
+using System.Collections;
+using System.ComponentModel.DataAnnotations;
+using System;
+
+namespace dotnetapp.Models
+{
+
+public class LibraryCard
+
+{
+
+    public int Id { get; set; }
+
+    [Required]
+
+    [RegularExpression(@"^LC-\d{5}$")]
+
+    public string CardNumber { get; set; }
+
+    [Required]
+
+    [MaxLength(100)]
+
+    public string MemberName { get; set; }
+
+    public DateTime ExpiryDate { get; set; }
+
+    public ICollection<Book> Books { get; set; }
+
+}
+}
+===============================================
+program.cs
+
+using dotnetapp.Models;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+
+
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+builder.Services.AddControllersWithViews();
+builder.Services.AddDbContext <AppDbContext>(options=>options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseExceptionHandler("/Home/Error");
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
+}
+
+app.UseHttpsRedirection();
+app.UseStaticFiles();
+
+app.UseRouting();
+
+app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();
+==============================================
+appsettings.json = same as 1st
