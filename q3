@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tip Calculator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Tip Calculator</h1>
+    <form id="tipForm">
+      <label for="billAmount">Bill Amount:</label>
+      <input type="number" id="billAmount" placeholder="Enter bill amount" required />
+
+      <label for="tipPercentage">Tip Percentage:</label>
+      <select id="tipPercentage" required>
+        <option value="5">5%</option>
+        <option value="10">10%</option>
+        <option value="15">15%</option>
+        <option value="20">20%</option>
+      </select>
+
+      <button type="button" onclick="calculateTip()">Calculate Tip</button>
+    </form>
+
+    <div id="result">
+      <p>Tip Amount: <span id="tipAmount">0</span></p>
+      <p>Total Amount: <span id="totalAmount">0</span></p>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+===========================================
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f9;
+  margin: 20px;
+}
+
+.container {
+  max-width: 600px;
+  margin: 50px auto;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+h1 {
+  text-align: center;
+}
+
+form {
+  display: grid;
+  gap: 10px;
+}
+
+input, select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+button {
+  background-color: #4caf50;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#result {
+  margin-top: 20px;
+}
+
+#result p {
+  font-weight: bold;
+}
+======================================
+
+function calculateTip() {
+  const billAmount = document.getElementById('billAmount').value;
+  const tipPercentage = document.getElementById('tipPercentage').value;
+
+  // Validate inputs
+  if (!billAmount || billAmount <= 0) {
+    alert("Please enter a valid bill amount.");
+    return;
+  }
+
+  // Calculate tip and total
+  const tip = (billAmount * tipPercentage) / 100;
+  const total = parseFloat(billAmount) + tip;
+
+  // Display results with two decimal places
+  document.getElementById('tipAmount').textContent = tip.toFixed(2);
+  document.getElementById('totalAmount').textContent = total.toFixed(2);
+}
