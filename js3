@@ -45,3 +45,11 @@
   </script>
 </body>
 </html>
+data.txt
+<ul id="userList">
+  <li>John Doe, 25</li>
+  <li>Jane Smith, 35</li>
+  <li>Michael Johnson, 40</li>
+  <li>Emily Brown, 28</li>
+  <li>David Wilson, 32</li>
+</ul>
