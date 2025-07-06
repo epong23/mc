@@ -1,0 +1,147 @@
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace YourNamespace.Controllers
+{
+    public class AppointmentController : Controller
+    {
+        // Static list to store appointment records
+        private static List<Appointment> _appointments = new List<Appointment>
+        {
+            new Appointment
+            {
+                AppointmentID = 1,
+                PatientFirstName = "John",
+                PatientLastName = "Doe",
+                PatientPhoneNumber = "1234567890",
+                PatientEmail = "john@example.com",
+                DoctorFirstName = "Dr. Alice",
+                DoctorLastName = "Smith",
+                DoctorSpecialty = "Cardiology",
+                AppointmentDate = DateTime.Now.AddDays(1),
+                Reason = "Regular Checkup"
+            },
+            new Appointment
+            {
+                AppointmentID = 2,
+                PatientFirstName = "Jane",
+                PatientLastName = "Roe",
+                PatientPhoneNumber = "9876543210",
+                PatientEmail = "jane@example.com",
+                DoctorFirstName = "Dr. Bob",
+                DoctorLastName = "Jones",
+                DoctorSpecialty = "Dermatology",
+                AppointmentDate = DateTime.Now.AddDays(2),
+                Reason = "Skin Rash"
+            }
+        };
+
+        // GET: Appointment
+        public IActionResult Index()
+        {
+            return View(_appointments);
+        }
+
+        // GET: Appointment/Create
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: Appointment/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(Appointment appointment)
+        {
+            if (ModelState.IsValid)
+            {
+                appointment.AppointmentID = _appointments.Max(a => a.AppointmentID) + 1;
+                _appointments.Add(appointment);
+                return RedirectToAction(nameof(Index));
+            }
+            return View(appointment);
+        }
+
+        // GET: Appointment/Edit/{id}
+        public IActionResult Edit(int id)
+        {
+            var appointment = _appointments.FirstOrDefault(a => a.AppointmentID == id);
+            if (appointment == null)
+            {
+                return NotFound();
+            }
+            return View(appointment);
+        }
+
+        // POST: Appointment/Edit/{id}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int id, Appointment updatedAppointment)
+        {
+            if (ModelState.IsValid)
+            {
+                var appointment = _appointments.FirstOrDefault(a => a.AppointmentID == id);
+                if (appointment == null)
+                {
+                    return NotFound();
+                }
+
+                appointment.PatientFirstName = updatedAppointment.PatientFirstName;
+                appointment.PatientLastName = updatedAppointment.PatientLastName;
+                appointment.PatientPhoneNumber = updatedAppointment.PatientPhoneNumber;
+                appointment.PatientEmail = updatedAppointment.PatientEmail;
+                appointment.DoctorFirstName = updatedAppointment.DoctorFirstName;
+                appointment.DoctorLastName = updatedAppointment.DoctorLastName;
+                appointment.DoctorSpecialty = updatedAppointment.DoctorSpecialty;
+                appointment.AppointmentDate = updatedAppointment.AppointmentDate;
+                appointment.Reason = updatedAppointment.Reason;
+
+                return RedirectToAction(nameof(Index));
+            }
+            return View(updatedAppointment);
+        }
+
+        // GET: Appointment/Delete/{id}
+        public IActionResult Delete(int id)
+        {
+            var appointment = _appointments.FirstOrDefault(a => a.AppointmentID == id);
+            if (appointment == null)
+            {
+                return NotFound();
+            }
+            return View(appointment);
+        }
+
+        // POST: Appointment/DeleteConfirmed/{id}
+        [HttpPost, ActionName("DeleteConfirmed")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            var appointment = _appointments.FirstOrDefault(a => a.AppointmentID == id);
+            if (appointment == null)
+            {
+                return NotFound();
+            }
+
+            _appointments.Remove(appointment);
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    // Appointment Model
+    public class Appointment
+    {
+        public int AppointmentID { get; set; }
+        public string PatientFirstName { get; set; }
+        public string PatientLastName { get; set; }
+        public string PatientPhoneNumber { get; set; }
+        public string PatientEmail { get; set; }
+        public string DoctorFirstName { get; set; }
+        public string DoctorLastName { get; set; }
+        public string DoctorSpecialty { get; set; }
+        public DateTime AppointmentDate { get; set; }
+        public string Reason { get; set; }
+    }
+}
