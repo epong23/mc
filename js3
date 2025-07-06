@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User Information</title>
+  <style>
+    .highlighted {
+      background-color: yellow;
+      font-weight: bold;
+    }
+  </style>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+  <h2>User Information</h2>
+
+  <button id="btnLoadUsers">Load User Data</button>
+  <div id="userContainer"></div>
+
+  <button id="btnHighlightAdults">Highlight Adults</button>
+
+  <script>
+    // Load user data from data.txt
+    $('#btnLoadUsers').click(function() {
+      $('#userContainer').load('data.txt', function() {
+        alert('User data loaded successfully!');
+      });
+    });
+
+    // Highlight users older than 30
+    $('#btnHighlightAdults').click(function() {
+      $('#userList li').each(function() {
+        // Get the text of the list item
+        var text = $(this).text();
+        // Extract the age
+        var age = parseInt(text.split(',')[1].trim());
+        if (age > 30) {
+          $(this).addClass('highlighted');
+        }
+      });
+
+      // Count highlighted adults
+      var count = $('#userList li.highlighted').length;
+      console.log('Number of highlighted adults:', count);
+    });
+  </script>
+</body>
+</html>
