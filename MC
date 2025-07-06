@@ -1,0 +1,132 @@
+MC3
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace YourNamespace.Controllers
+{
+    public class FeedbackController : Controller
+    {
+        // Static list to store feedback records
+        private static List<Feedback> feedbackList = new List<Feedback>
+        {
+            new Feedback
+            {
+                Id = 1,
+                StudentName = "Alice",
+                Course = "Math",
+                Feedbacks = "Good course.",
+                Rating = 4,
+                DateSubmitted = DateTime.Now
+            },
+            new Feedback
+            {
+                Id = 2,
+                StudentName = "Bob",
+                Course = "Science",
+                Feedbacks = "Very informative.",
+                Rating = 5,
+                DateSubmitted = DateTime.Now
+            }
+        };
+
+        // GET: Feedback
+        public IActionResult Index()
+        {
+            return View(feedbackList);
+        }
+
+        // GET: Feedback/Create
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // POST: Feedback/Create
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Create(Feedback feedback)
+        {
+            if (ModelState.IsValid)
+            {
+                feedback.Id = feedbackList.Max(f => f.Id) + 1;
+                feedback.DateSubmitted = DateTime.Now;
+                feedbackList.Add(feedback);
+                return RedirectToAction(nameof(Index));
+            }
+            return View(feedback);
+        }
+
+        // GET: Feedback/Edit/{id}
+        public IActionResult Edit(int id)
+        {
+            var feedback = feedbackList.FirstOrDefault(f => f.Id == id);
+            if (feedback == null)
+            {
+                return NotFound();
+            }
+            return View(feedback);
+        }
+
+        // POST: Feedback/Edit/{id}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Edit(int id, Feedback updatedFeedback)
+        {
+            if (ModelState.IsValid)
+            {
+                var feedback = feedbackList.FirstOrDefault(f => f.Id == id);
+                if (feedback == null)
+                {
+                    return NotFound();
+                }
+
+                feedback.StudentName = updatedFeedback.StudentName;
+                feedback.Course = updatedFeedback.Course;
+                feedback.Feedbacks = updatedFeedback.Feedbacks;
+                feedback.Rating = updatedFeedback.Rating;
+                feedback.DateSubmitted = DateTime.Now;
+
+                return RedirectToAction(nameof(Index));
+            }
+            return View(updatedFeedback);
+        }
+
+        // GET: Feedback/Delete/{id}
+        public IActionResult Delete(int id)
+        {
+            var feedback = feedbackList.FirstOrDefault(f => f.Id == id);
+            if (feedback == null)
+            {
+                return NotFound();
+            }
+            return View(feedback);
+        }
+
+        // POST: Feedback/DeleteConfirmed/{id}
+        [HttpPost, ActionName("DeleteConfirmed")]
+        [ValidateAntiForgeryToken]
+        public IActionResult DeleteConfirmed(int id)
+        {
+            var feedback = feedbackList.FirstOrDefault(f => f.Id == id);
+            if (feedback == null)
+            {
+                return NotFound();
+            }
+            feedbackList.Remove(feedback);
+            return RedirectToAction(nameof(Index));
+        }
+    }
+
+    // Feedback Model
+    public class Feedback
+    {
+        public int Id { get; set; }
+        public string StudentName { get; set; }
+        public string Course { get; set; }
+        public string Feedbacks { get; set; }
+        public int Rating { get; set; }
+        public DateTime DateSubmitted { get; set; }
+    }
+}
